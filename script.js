@@ -9,10 +9,12 @@ const dislikeBtn = document.getElementById("dislike");
 
 async function fetchCats() {
     allCats = [];
+    cardStack.innerHTML = '<p style="font-size: 18px;">Loading cats... 🐾</p>';
 
     for (let i = 0; i < catCount; i++) {
-        const rand = Math.floor(Math.random() * 1000000);
-        allCats.push(`https://cataas.com/cat?width=300&height=400&random=${rand}`);
+        const response = await fetch("https://cataas.com/cat?json=true");
+        const data = await response.json();
+        allCats.push(`https://cataas.com${data.url}`);
     }
     renderCard();
 }
@@ -23,9 +25,18 @@ function renderCard() {
         return;
     }
 
+    cardStack.innerHTML = '<p style="font-size: 18px;">Loading cat... 🐾</p>';
+
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = `<img src="${allCats[currentIndex]}" alt="cat">`;
+
+    const img = new Image();
+    img.src = allCats[currentIndex];
+    img.alt = "cat";
+    
+    img.onload = () => {
+        card.innerHTML = "";
+        card.appendChild(img);
 
     let startX = 0;
     let currentX = 0;
@@ -54,6 +65,12 @@ function renderCard() {
 
     cardStack.innerHTML = "";
     cardStack.appendChild(card);
+};
+
+img.onerror = () => {
+    cardStack.innerHTML = `<p>😿 Failed to load cat. Try refreshing.</p>`;
+};
+
 }
 
 function handleVote(liked) {
